@@ -1,7 +1,8 @@
 //first version
 //3 buffers, i couldn't do it with two
 //need to add the shader to turn the heightfield into a normal map,
-
+//example:
+//http://dusanbosnjak.com/test/webGL/new/waterShader/waterShader.html
 
 
 var pailhead = pailhead || {};
