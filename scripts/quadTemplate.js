@@ -205,8 +205,6 @@ function init() {
     stats.domElement.style.zIndex = 100; 
     container.appendChild(stats.domElement);
 
-    texture = new THREE.ImageUtils.loadTexture( './textures/airport_night_final.jpg' );
-
 
     //custom uniforms
     var quadUniforms = {
