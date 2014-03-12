@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>THREE.js fullscreen quad shader template</title>
+<title>THREE.js rain droplet shader demo</title>
 <style>
 
 body{
 	margin:0;
+	overflow: hidden;
 }
 
 canvas {
@@ -20,12 +21,39 @@ canvas {
 	width: 100%;
 	height: 100%;
 }
+a{
+	color:#ffffff;
+}
+#info {
+	width: 500px;
+	margin: auto;
+	left: 0;
+	right: 0;
+	top:0;
+	padding: 20px;
+	position: absolute;
+	background: #000;
+	border-radius: 15px;
+	opacity: .75;
+	color: white;
+	font-family: sans-serif, monospace;
+}
 
 </style>
 </head>
 
 <body>
 <div id="container"></div>
+<div id="info">
+	Attempt at porting <a href="http://freespace.virgin.net/hugo.elias/graphics/x_water.htm" target="_blank">this</a> to webGL using GLSL. <br>
+	<br> 
+</p>
+	The script is packaged so that it should be easy to use with three.js. Currently it's using three buffers and outputing just the height field. I'd like to add the normal map generation as an integrated shader and output it in the remaining three channels which are currently empty. The normal map shader is in the html file.<br>
+	<br>
+	Github:<br>
+	<br>
+	<a href="https://github.com/pailhead/rainDropletShader" target="_blank">https://github.com/pailhead/rainDropletShader</a>
+</div>
 
 
 <!--****************************-->

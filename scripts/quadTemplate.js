@@ -34,7 +34,16 @@ var twn = {val:1};
 var tween;
 
 
+var info = {
+    id: null,
+    height:0,
+    top:0,
+    twnVal: 0
+};
 
+var tweenInfo;
+var infoTween = true;
+var infoTwTime = 350;
 
 
 
@@ -51,6 +60,7 @@ var guiParam = {
     dropletNth: 10,
     strength: 1,
     tweening: false,
+    showInfo: showInfo,
     screen2threed: function(){
 
         function updateLerpShader( val ){
@@ -111,12 +121,38 @@ gui.add(guiParam, "strength", 0, 3).step(.01).onChange(function(){
 });
 gui.add(guiParam, "screen2threed");
 
-
-init();
-
+gui.add(guiParam, "showInfo");
 
 
+//info
 
+
+
+$(document).ready(function(){
+
+    scrWIDTH = window.innerWidth;
+    scrHEIGHT = window.innerHeight;
+
+    adjustInfo();
+
+    info.id.css({opacity:0});
+    init();
+
+});
+
+
+
+function adjustInfo(){
+
+    info.id = $('#info');
+    info.height = info.id.height();
+    info.top = (scrHEIGHT - info.height) / 2;
+
+    console.log('info.height', info.height);
+    info.id.css(
+        {top: info.top}
+    );
+}
 
 
 var waterShader;
@@ -130,8 +166,6 @@ function init() {
     container = document.getElementById("container");
 
     //window info
-    scrWIDTH = window.innerWidth;
-    scrHEIGHT = window.innerHeight;
     // console.log(scrWIDTH, scrHEIGHT);
     scrASPECT = scrWIDTH / scrHEIGHT;
 
@@ -157,7 +191,7 @@ function init() {
     time = 0;
 
 
-    waterShader = new pailhead.waterShader(scene, BUFFERSIZE, 1 );
+    waterShader = new pailhead.waterShader(scene, BUFFERSIZE);
 
     camera = new THREE.PerspectiveCamera(35, scrASPECT , 0.5, 200);
     scene.add(camera);
@@ -239,8 +273,6 @@ function animate2() {
     waterShader.update();
 }
 
-var counter = 0;
-var countTo = 10;
 
 function update(){
 
@@ -275,6 +307,8 @@ function onWindowResize(){
     console.log(scrWIDTH, scrHEIGHT);
     scrASPECT = scrWIDTH / scrHEIGHT;
     renderer.setSize(scrWIDTH, scrHEIGHT);
+
+    adjustInfo();
 }
 
 
@@ -292,3 +326,39 @@ function onDocumentMouseMove( event )
     mouse.y = 1 - ( event.clientY / window.innerHeight );
 }
 
+
+
+function showInfo(){
+
+    if(tweenInfo)
+        tweenInfo.stop();
+
+    if(infoTween){
+        info.id.click(showInfo);
+
+        console.log('TWEEN VALUE IS = ' + info.twnVal);
+        tweenInfo = new TWEEN.Tween( info )
+        .to(  {twnVal:.74} , infoTwTime )
+        .easing( TWEEN.Easing.Quadratic.InOut )
+        .onUpdate( function(){
+            info.id.css({opacity:info.twnVal});
+        })
+        .start();
+
+    } else {
+
+        info.id.unbind("click");    
+        
+        console.log('TWEEN VALUE IS = ' + info.twnVal);
+        tweenInfo = new TWEEN.Tween( info )
+        .to(  {twnVal:0} , infoTwTime )
+        .easing( TWEEN.Easing.Quadratic.InOut )
+        .onUpdate( function(){
+            info.id.css({opacity:info.twnVal});
+        })
+        .start();
+
+    }
+    infoTween =! infoTween;
+    
+}
