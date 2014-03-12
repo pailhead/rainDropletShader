@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>THREE.js fullscreen quad shader template</title>
+<style>
+
+body{
+	margin:0;
+}
+
+canvas {
+	width: 100%; 
+	height: 100%; 
+	background: #000;
+    display: block; /* fix necessary to remove space at bottom of canvas */
+}
+
+#container {
+	background: #000;
+	width: 100%;
+	height: 100%;
+}
+
+</style>
+</head>
+
+<body>
+<div id="container"></div>
+
+
+<!--****************************-->
+<!-- 	   vertex shader 	    -->
+<!--****************************-->
+<script type="x-shader/x-vertex" id="vertexShader">
+
+varying vec2 vUv;
+uniform float _lerpFromScreen; 
+ 
+void main()	{
+	vUv = uv;
+
+	vec4 screenPosition = vec4(position.xy, -.041, 1.0);
+	vec4 projectedPos = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+	
+
+
+	gl_Position = mix( projectedPos, screenPosition, _lerpFromScreen );//position sent to the fragment shader
+	// gl_Position = projectedPos;//position sent to the fragment shader
+}
+
+</script>
+
+
+
+<!--****************************-->
+<!-- 	   fragment shader 	    -->
+<!--****************************-->
+
+<script type="x-shader/x-fragment" id="fragmentShader">
+
+varying vec2 vUv; //from vert shader=
+uniform sampler2D _texture;
+uniform float _texelSize;
+uniform float _lerpFromScreen; 
+
+
+void main()	{
+
+	vec2 UV = vUv;
+	float wave = texture2D(_texture, UV).x;
+
+
+    vec3 lightPos = vec3(2.0,2.0,1.0);
+    vec3 UVtoLight = -vec3(UV,0.0) + lightPos; 
+    UVtoLight = normalize(UVtoLight);
+
+    float left = texture2D(_texture, vec2(UV.x-_texelSize, UV.y)).x;//levo
+    float right = texture2D(_texture, vec2(UV.x+_texelSize, UV.y)).x;//d
+    float down = texture2D(_texture, vec2(UV.x, UV.y-_texelSize)).x;
+    float up = texture2D(_texture, vec2(UV.x, UV.y+_texelSize)).x;
+    vec3 vecA = normalize(vec3(vec2(2.0,0.0),right-left));
+    vec3 vecB = normalize(vec3(vec2(0.0,2.0),up-down));
+    vec3 normal = vec3( cross(vecA,vecB));
+
+    normal = normalize( normal );
+
+
+	float NdotL = dot(normal, UVtoLight);
+	NdotL = clamp(NdotL, 0.0, 1.0);
+
+	gl_FragColor = vec4(vec3(NdotL, wave , NdotL), 1.0);
+	// gl_FragColor = vec4(vec3(UV, wave), 1.0);
+	// gl_FragColor = vec4(, 1.0);
+}
+
+
+</script>
+
+
+
+
+
+<!--****************************-->
+<!-- 	   vertex shader 	    -->
+<!--****************************-->
+<script type="x-shader/x-vertex" id="vertexShaderWater">
+
+varying vec2 vUv;
+ 
+void main()	{
+
+	vUv = uv;
+	gl_Position = vec4(position.xy, -.041, 1.0);//position sent to the fragment shader
+}
+
+</script>
+
+
+
+<!--****************************-->
+<!-- 	   fragment shader 	    -->
+<!--****************************-->
+
+<script type="x-shader/x-fragment" id="fragmentShaderWater">
+
+varying vec2 vUv; //from vert shader
+
+uniform sampler2D _waterPreviousFrame;
+uniform sampler2D _waterTwoFrameBefore;
+
+uniform vec2 _mousePos;
+uniform int _currentBfNumber;
+uniform int _mouseClicked;
+uniform float _time;
+uniform float _size;
+uniform float _damping;
+uniform float _duration;
+
+void main()	{
+	float damping = _damping;
+	float texelSize = 1.0/_size;
+	// texelSize *= _duration;
+	vec2 UV = vUv;
+  	ivec2 iUV = ivec2(int(UV.x*_size), int(UV.y*_size));
+  	ivec2 iMouse = ivec2(int(_mousePos.x * _size), int(_mousePos.y * _size));
+  	float mouseValue = 0.0;
+  	if(_mouseClicked==1)
+	  	if(iUV==iMouse)
+	  		mouseValue+=.8;
+	float twoFramesAgo = texture2D(_waterTwoFrameBefore, vec2(UV)).x;
+	// vec2 oneFrameAgo = texture2D(_waterPreviousFrame, vec2(UV.x, UV.y)).xy;
+	vec4 bluredPreviousFrame = (
+			texture2D(_waterPreviousFrame, vec2(UV.x - texelSize, UV.y) ) 
+		+	texture2D(_waterPreviousFrame, vec2(UV.x + texelSize, UV.y) )
+		+	texture2D(_waterPreviousFrame, vec2(UV.x, UV.y + texelSize) )
+		+	texture2D(_waterPreviousFrame, vec2(UV.x, UV.y - texelSize) )	
+		) * .25; 
+	float currentResult = bluredPreviousFrame.x * 2.0 - twoFramesAgo;
+	currentResult *= damping;
+	currentResult += mouseValue;
+	gl_FragColor = vec4(currentResult, 0.0, 0.0, 1.0);
+}
+
+
+</script>
+
+
+<script type="text/javascript" src="./scripts/jquery.min.js"></script>
+<script type="text/javascript" src="./scripts/three.min.js"></script>
+<script type="text/javascript" src="./scripts/dat.gui.min.js"></script>
+<script type="text/javascript" src="./scripts/Detector.js"></script>
+<script type="text/javascript" src="./scripts/tween.min.js"></script>
+<script type="text/javascript" src="./scripts/Stats.js"></script><script type="text/javascript" src="./scripts/OrbitControls.js"></script>
+<script type="text/javascript" src="./scripts/pailheadWater.js"></script>
+<script type="text/javascript" src="./scripts/quadTemplate.js"></script>
+
+
+
+</body>
+</html>
+
+
+
+
